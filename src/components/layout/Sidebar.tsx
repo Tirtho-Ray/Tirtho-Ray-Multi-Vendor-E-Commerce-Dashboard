@@ -19,7 +19,7 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  { title: "Home", icon: <FaHome />, path: "/" },
+  { title: "Home", icon: <FaHome />, path: "/dashboard" },
   { title: "Products", icon: <FaProductHunt />, path: "/products" },
   { title: "Vendors", icon: <FaSpotify />, path: "/vendors" },
   { title: "Admin", icon: <FaBalanceScale />, path: "/admin" },
