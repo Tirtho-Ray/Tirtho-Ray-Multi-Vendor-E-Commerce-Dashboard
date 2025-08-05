@@ -1,81 +1,54 @@
-'use client';
-
-import { JSX, useState } from 'react';
+import { JSX } from "react";
+import Link from "next/link"; 
 import {
-  FaChevronDown,
-  FaChevronUp,
-  FaBitcoin,
-  FaChartLine,
   FaSpotify,
   FaBalanceScale,
   FaCopy,
   FaWallet,
   FaGift,
   FaEllipsisH,
-} from 'react-icons/fa';
+  FaHome,
+} from "react-icons/fa";
+import { FaProductHunt } from "react-icons/fa6";
 
 type MenuItem = {
   title: string;
   icon: JSX.Element;
+  path: string;
   expandable?: boolean;
 };
 
 const menuItems: MenuItem[] = [
-  { title: 'Buy Crypto', icon: <FaBitcoin /> },
-  { title: 'Markets', icon: <FaChartLine /> },
-  { title: 'Spot', icon: <FaSpotify /> },
-  { title: 'Derivatives', icon: <FaBalanceScale /> },
-  { title: 'Copy Trading', icon: <FaCopy /> },
-  { title: 'Wealth', icon: <FaWallet /> },
-  { title: 'Rewards Hub', icon: <FaGift /> },
-  { title: 'More', icon: <FaEllipsisH />, expandable: false },
+  { title: "Home", icon: <FaHome />, path: "/" },
+  { title: "Products", icon: <FaProductHunt />, path: "/products" },
+  { title: "Vendors", icon: <FaSpotify />, path: "/vendors" },
+  { title: "Admin", icon: <FaBalanceScale />, path: "/admin" },
+  { title: "Copy Trading", icon: <FaCopy />, path: "/copy-trading" },
+  { title: "Wealth", icon: <FaWallet />, path: "/wealth" },
+  { title: "Rewards Hub", icon: <FaGift />, path: "/rewards" },
+  { title: "More", icon: <FaEllipsisH />, path: "/more", expandable: false },
 ];
 
-const Sidebar: React.FC = () => {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
-
-  const toggleSection = (title: string): void => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
-  };
-
+const Sidebar = () => {
   return (
-    <aside className="w-full max-w-[300px] p-5 rounded-2xl bg-gradient-to-b from-[#0e2126] via-[#102a2e] to-[#0a1b1f] shadow-[0_0_30px_rgba(0,255,210,0.1)]">
+    <aside className="w-full md:max-w-[150px] lg:max-w-[200px] xl:max-w-[250px] md:p-3 lg:px-3 lg:py-5 rounded-2xl bg-gradient-to-b from-[#0e2126] via-[#102a2e] to-[#0a1b1f]">
       <div className="text-xl font-semibold mb-6 flex items-center space-x-2 text-white">
         <div className="w-4 h-4 bg-teal-400 rounded-full animate-pulse" />
         <span>Xbit Sora</span>
       </div>
 
       <nav className="space-y-2">
-        {menuItems.map(({ title, icon, expandable = true }) => (
+        {menuItems.map(({ title, icon, path }) => (
           <div key={title}>
-            <button
-              className={`flex items-center justify-between w-full px-4 py-3 rounded-xl transition-all bg-[#11292e] hover:bg-[#164047] text-white ${
-                openSections[title] ? 'bg-[#164047]' : ''
-              }`}
-              onClick={() => expandable && toggleSection(title)}
+            <Link
+              href={path}
+              className="flex items-center justify-between w-full px-4 py-3 rounded-xl transition-all bg-[#11292e] hover:bg-[#164047] text-white"
             >
               <div className="flex items-center space-x-3">
-                <span className="text-lg text-teal-300">{icon}</span>
-                <span>{title}</span>
+                <span className="md:text-[12px] lg:text-xl text-teal-300">{icon}</span>
+                <span className="md:text-[10px] lg:text-lg text-white">{title}</span>
               </div>
-              {expandable &&
-                (openSections[title] ? (
-                  <FaChevronUp size={14} />
-                ) : (
-                  <FaChevronDown size={14} />
-                ))}
-            </button>
-
-            {expandable && openSections[title] && (
-              <div className="ml-10 mt-2 text-sm text-gray-400 space-y-1">
-                {/* Sub-options placeholder */}
-                <p>- Option 1</p>
-                <p>- Option 2</p>
-              </div>
-            )}
+            </Link>
           </div>
         ))}
       </nav>
