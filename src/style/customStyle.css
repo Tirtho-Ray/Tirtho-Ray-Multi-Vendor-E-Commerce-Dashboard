@@ -1,0 +1,3 @@
+@apply bigText {
+    @apply text-[10px] md:text-[15px] lg:text-2xl xl:text-3xl
+}
