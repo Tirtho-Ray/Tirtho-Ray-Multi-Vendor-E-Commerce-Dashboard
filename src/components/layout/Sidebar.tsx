@@ -23,7 +23,7 @@ const menuItems: MenuItem[] = [
   { title: "Products", icon: <FaProductHunt />, path: "/products" },
   { title: "Vendors", icon: <FaSpotify />, path: "/vendors" },
   { title: "Admin", icon: <FaBalanceScale />, path: "/admin" },
-  { title: "Copy Trading", icon: <FaCopy />, path: "/copy-trading" },
+  { title: "Copy ", icon: <FaCopy />, path: "/copy-trading" },
   { title: "Wealth", icon: <FaWallet />, path: "/wealth" },
   { title: "Rewards Hub", icon: <FaGift />, path: "/rewards" },
   { title: "More", icon: <FaEllipsisH />, path: "/more", expandable: false },

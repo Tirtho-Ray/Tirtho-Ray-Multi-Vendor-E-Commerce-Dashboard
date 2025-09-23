@@ -9,8 +9,8 @@ const DashboardHome = () => {
                         <h1 className='h-10 w-10 rounded-full  bg-slate-400'></h1>
                     </div>
                     <div className=''>
-                        <p>Araddha</p>
-                        <p>aru@gmail.com</p>
+                        <p>Sam jisan</p>
+                        <p>sam@gmail.com</p>
                     </div>
                 </div>
                 <div>
