@@ -4,10 +4,40 @@ import InputField from "@/components/ui/forms/InputField";
 import { FormWrapper } from "@/components/ui/forms/FormWrapper";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginValidationSchema } from "@/schema/login.scheme";
+import { useLoginMutation } from "@/redux/api/auth/authApi";
+import { SubmitErrorHandler } from "react-hook-form";
+import { TLogin } from "@/types/authType";
+import { toast } from "sonner";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
+// import { TLogin } from "@/types/authType";
 
 const LoginForm = () => {
-  const onSubmit = (data: any) => {
-    console.log("Login form submitted with data:", data);
+  const [login] = useLoginMutation();
+  const router = useRouter()
+
+
+
+  const onSubmit: SubmitErrorHandler<TLogin> = async (data) => {
+    try {
+      const result = await login(data).unwrap();
+      const accessToken = result?.data.accessToken
+      // console.log("Access Token:", accessToken);
+
+      Cookies.set("accessToken", accessToken, { expires: 1, path: "/" });
+      toast.success("Logged in successfully!");
+
+      // console.log("Login done", result);
+      router.push("/dashboard")
+      // Router.push("/dashboard");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const message =
+        error?.data?.errorSources?.[0]?.message ||
+        error?.data?.message ||
+        "Login failed. Please try again.";
+      toast.error(message);
+    }
   };
 
   return (
