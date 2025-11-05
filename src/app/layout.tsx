@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import NextUiProvider from "@/lib/providers/NextUiProvider";
+import AllProvider from "@/lib/providers/AllProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,12 +26,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#2DBDB8]`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
-        <NextUiProvider>
-           {children}
-        </NextUiProvider>
-          
+        <AllProvider>
+          {children}
+        </AllProvider>
+
       </body>
     </html>
   );

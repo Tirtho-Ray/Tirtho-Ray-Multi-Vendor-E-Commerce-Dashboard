@@ -22,14 +22,13 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  { title: "Home", icon: <FaHome />, path: "/dashboard" },
   {
     title: "Manage User",
     icon: <FaUser />,
     expandable: true,
     subMenu: [
-      { title: "Create Admin", path: "/manage-user/create-admin" },
-      { title: "Manage vendors", path: "/products/update" },
+      { title: "Manage Admin", path: "/manage-user/manage-admin" },
+      { title: "Manage vendors", path: "/manage-user/manage-vendor" },
     ],
   },
   { title: "Vendors", icon: <FaSpotify />, path: "/vendors" },
@@ -51,7 +50,7 @@ const Sidebar = () => {
     <aside className="w-full md:max-w-[150px] lg:max-w-[200px] xl:max-w-[250px] md:p-3 lg:px-3 lg:py-5 rounded-2xl bg-gradient-to-b from-[#0e2126] via-[#102a2e] to-[#0a1b1f]">
       <div className="text-xl font-semibold mb-6 flex items-center space-x-2 text-white">
         <div className="w-4 h-4 bg-teal-400 rounded-full animate-pulse" />
-        <span>Xbit Sora</span>
+        <Link href="/dashboard">Xbit Sora</Link>
       </div>
 
       <nav className="space-y-2">

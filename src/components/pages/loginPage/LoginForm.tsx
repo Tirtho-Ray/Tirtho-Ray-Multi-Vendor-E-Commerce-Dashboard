@@ -2,7 +2,7 @@
 
 import InputField from "@/components/ui/forms/InputField";
 import { FormWrapper } from "@/components/ui/forms/FormWrapper";
-import { zodResolver } from "@hookform/resolvers/zod";
+
 import { loginValidationSchema } from "@/schema/login.scheme";
 import { useLoginMutation } from "@/redux/api/auth/authApi";
 import { SubmitErrorHandler } from "react-hook-form";
@@ -10,11 +10,16 @@ import { TLogin } from "@/types/authType";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-// import { TLogin } from "@/types/authType";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/features/auth/authSilce";
+import { decodeToken } from "@/utils/jwt";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 
 const LoginForm = () => {
   const [login] = useLoginMutation();
-  const router = useRouter()
+  const router = useRouter();
+  const dispatch = useDispatch();
 
 
 
@@ -26,6 +31,11 @@ const LoginForm = () => {
 
       Cookies.set("accessToken", accessToken, { expires: 1, path: "/" });
       toast.success("Logged in successfully!");
+
+      const decodedUser = decodeToken(accessToken);
+      if (decodedUser) {
+        dispatch(setUser({ user: decodedUser, accessToken }));
+      }
 
       // console.log("Login done", result);
       router.push("/dashboard")

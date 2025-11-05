@@ -6,5 +6,5 @@ import {z} from "zod"
 
 export const loginValidationSchema  = z.object({
     email:z.string().email("Please enter valid email address").trim(),
-    password:z.string().trim().min(6,"Password must must be latest 6 characters")
+    password:z.string().trim().min(2,"Password must must be latest 2 characters")
 });
