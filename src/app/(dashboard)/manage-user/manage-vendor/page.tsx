@@ -1,216 +1,213 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import React, { useState } from "react";
 import { useAllVendorsQuery } from "@/redux/api/vendor/vendorApi";
+import VendorModal from "@/components/ui/modal/VendorModal";
 
-const ManageVendor = () => {
+const ManageVendor: React.FC = () => {
     const { data: vendors, isLoading, isError } = useAllVendorsQuery();
+    const [searchTerm, setSearchTerm] = useState<string>("");
+    const [selectedVendor, setSelectedVendor] = useState<any>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [filterStatus, setFilterStatus] = useState<string>("ALL");
 
+    // Loading & Error States
     if (isLoading)
         return (
-            <p className="text-center mt-10 text-gray-500 animate-pulse text-lg">
+            <p className="text-center mt-8 text-gray-500 animate-pulse">
                 Loading vendors...
             </p>
         );
 
     if (isError)
         return (
-            <p className="text-center mt-10 text-red-500 font-medium text-lg">
+            <p className="text-center mt-8 text-red-500 font-medium">
                 Failed to load vendors.
             </p>
         );
 
+    // ✅ Vendor Status Counts
+    const statusCounts = {
+        ALL: vendors?.length || 0,
+        approved: vendors?.filter((v: any) => v.status === "approved").length || 0,
+        pending: vendors?.filter((v: any) => v.status === "pending").length || 0,
+        rejected: vendors?.filter((v: any) => v.status === "rejected").length || 0,
+        misInfo: vendors?.filter((v: any) => v.status === "misInfo").length || 0,
+    };
+
+    // ✅ Count Boxes Config
+    const statusBoxes = [
+        { status: "ALL", count: statusCounts.ALL, bg: "from-gray-400 to-gray-300" },
+        { status: "approved", count: statusCounts.approved, bg: "from-green-400 to-green-500" },
+        { status: "pending", count: statusCounts.pending, bg: "from-yellow-400 to-yellow-500" },
+        { status: "rejected", count: statusCounts.rejected, bg: "from-red-400 to-red-500" },
+        { status: "misInfo", count: statusCounts.misInfo, bg: "from-purple-400 to-purple-500" },
+    ];
+
+    const statuses = ["ALL", "approved", "pending", "rejected", "misInfo"];
+
+    // ✅ Filtered Vendors
+    const filteredVendors = vendors?.filter((vendor: any) => {
+        const matchesStatus =
+            filterStatus === "ALL" || vendor.status === filterStatus;
+        const matchesSearch =
+            vendor.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            vendor.email?.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesStatus && matchesSearch;
+    });
+
+    // ✅ Open Modal Handler
+    const handleVendorClick = (vendor: any) => {
+        setSelectedVendor(vendor);
+        setIsModalOpen(true);
+    };
+
     return (
-        <div className="p-6 max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8 text-teal-800 text-center mt-3 ">Manage Vendors</h1>
+        <div className="p-6 max-w-6xl mx-auto">
+            <h1 className="text-3xl font-bold text-teal-700 text-center">
+                Manage Vendors
+            </h1>
 
-            {vendors?.length === 0 ? (
-                <p className="text-center text-gray-500 text-lg">No vendors found.</p>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
-                    {vendors?.map((vendor) => (
-                        <div
-                            key={vendor._id}
-                            className="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col"
-                        >
-                            {/* Banner + Logo */}
-                            <div className="relative h-32 w-full">
-                                <img
-                                    src={vendor.bannerImg}
-                                    alt={`${vendor.shopName} banner`}
-                                    className="object-cover w-full h-full"
-                                />
-                                <img
-                                    src={vendor.logoImg}
-                                    alt={`${vendor.shopName} logo`}
-                                    className="absolute -bottom-6 left-4 w-16 h-16 rounded-full border-2 border-white object-cover"
-                                />
-                            </div>
+            {/* ✅ Status Count Boxes */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 mb-8 mt-10">
+                {statusBoxes.map((box) => (
+                    <div
+                        key={box.status}
+                        onClick={() => setFilterStatus(box.status)}
+                        className={`flex flex-col items-center justify-center p-6 rounded-xl text-white font-bold shadow-lg cursor-pointer transform transition hover:scale-105 bg-gradient-to-r ${box.bg} ${filterStatus === box.status ? "ring-2 ring-white" : ""
+                            }`}
+                    >
+                        <span className="text-3xl">{box.count}</span>
+                        <span className="uppercase mt-2">
+                            {box.status.replace("_", " ")}
+                        </span>
+                    </div>
+                ))}
+            </div>
 
-                            <div className="p-6 pt-10 flex-1 flex flex-col justify-between">
-                                <div className="flex">
-                                    {/* Vendor Info */}
-                                    <div className="mb-4">
-                                        <h2 className="text-xl font-semibold text-gray-800 mb-1">{vendor.shopName}</h2>
-                                        <p className="text-sm text-gray-500 mb-2">{vendor.description}</p>
+            {/* ✅ Controls */}
+            <div className="flex justify-between items-center mb-6 relative mt-20">
+                <div></div>
 
-                                        <div className="text-sm text-gray-600 space-y-1 mb-3">
-                                            <p>
-                                                <span className="font-medium">Owner:</span> {vendor.userId?.name}
-                                            </p>
-                                            <p>
-                                                <span className="font-medium">Email:</span> {vendor.email}
-                                            </p>
-                                            <p>
-                                                <span className="font-medium">Phone:</span> {vendor.phone}
-                                            </p>
-                                            <p>
-                                                <span className="font-medium">Address:</span>{" "}
-                                                {vendor.address?.street}, {vendor.address?.city},{" "}
-                                                {vendor.address?.state}, {vendor.address?.postalCode},{" "}
-                                                {vendor.address?.country}
-                                            </p>
-                                            <p>
-                                                <span className="font-medium">Business Type:</span> {vendor.businessType}
-                                            </p>
-                                        </div>
+                {/* Search */}
+                <div className="rounded-full bg-gradient-to-r backdrop-blur-md bg-black/15 border border-white/30 font-semibold shadow hover:shadow-lg transition-all">
+                    <input
+                        type="search"
+                        className="w-[400px] px-4 py-2 rounded-full text-white text-[12px] placeholder:text-gray-300 focus:outline-none"
+                        placeholder="Search vendor..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
 
-                                        {/* Categories */}
-                                        {vendor.productCategories?.length > 0 && (
-                                            <p className="text-sm text-gray-600 mb-3">
-                                                <span className="font-medium">Categories:</span>{" "}
-                                                {vendor.productCategories.join(", ")}
-                                            </p>
-                                        )}
-                                    </div>
-                                    {/* Bank Details */}
-                                    {vendor.bankDetails && (
-                                        <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                            <p className="font-medium text-gray-700 mb-1">Bank Details</p>
-                                            <ul className="text-sm text-gray-600 space-y-1">
-                                                <li>
-                                                    <span className="font-medium">Account Name:</span> {vendor.bankDetails.accountName}
-                                                </li>
-                                                <li>
-                                                    <span className="font-medium">Account Number:</span> {vendor.bankDetails.accountNumber}
-                                                </li>
-                                                <li>
-                                                    <span className="font-medium">Bank:</span> {vendor.bankDetails.bankName}
-                                                </li>
-                                                <li>
-                                                    <span className="font-medium">IFSC:</span> {vendor.bankDetails.ifscCode}
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    )}
+                {/* Dropdown Filter */}
+                <div className="relative">
+                    <button
+                        className="text-[14px] px-4 py-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 font-semibold shadow hover:shadow-lg transition-all"
+                        onClick={() => setShowDropdown(!showDropdown)}
+                    >
+                        Filter
+                    </button>
+
+                    {showDropdown && (
+                        <div className="absolute right-1 mt-2 w-40 rounded-lg shadow-lg z-10 backdrop-blur-md bg-black/40 border border-white/30 text-white text-[10px]">
+                            {statuses.map((status) => (
+                                <div
+                                    key={status}
+                                    className={`px-4 py-2 cursor-pointer hover:bg-blue-500/50 transition hover:rounded-lg ${filterStatus === status
+                                        ? "font-bold bg-teal-200/50 border rounded-lg"
+                                        : ""
+                                        }`}
+                                    onClick={() => {
+                                        setFilterStatus(status);
+                                        setShowDropdown(false);
+                                    }}
+                                >
+                                    {status}
                                 </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
 
-                                {/* Documents */}
-                                {vendor.documents && (
-                                    <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                        <p className="font-medium text-gray-700 mb-1">Documents</p>
-                                        <ul className="text-sm text-gray-600 space-y-1">
-                                            <li>
-                                                <span className="font-medium">National ID:</span> {vendor.documents.nationalId}
-                                            </li>
-                                            <li>
-                                                <span className="font-medium">Trade License:</span> {vendor.documents.tradeLicense}
-                                            </li>
-                                            {vendor.documents.otherDocs?.map((doc, index) => (
-                                                <li key={index}>
-                                                    <a
-                                                        href={doc.url}
-                                                        target="_blank"
-                                                        className="text-blue-600 hover:underline"
-                                                    >
-                                                        {doc.name}
-                                                    </a>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-
-                                {/* Status Badges */}
-                                <div className="flex flex-wrap gap-2 text-xs mb-4">
+            {/* ✅ Vendor Table */}
+            <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+                <table className="min-w-full text-left text-sm">
+                    <thead className="uppercase text-xs tracking-wider">
+                        <tr>
+                            <th className="px-6 py-3">Name</th>
+                            <th className="px-6 py-3">Email</th>
+                            <th className="px-6 py-3">City</th>
+                            <th className="px-6 py-3">NID Number</th>
+                            <th className="px-6 py-3">Status</th>
+                            <th className="px-6 py-3 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredVendors?.map((vendor: any, index: number) => (
+                            <tr
+                                key={vendor._id || index}
+                                className="border-t hover:bg-blue-500 transition-colors"
+                            >
+                                <td className="px-6 py-3 font-medium">
                                     <span
-                                        className={`px-2 py-1 rounded-full font-semibold ${vendor.status === "approved"
-                                            ? "bg-green-100 text-green-800"
-                                            : "bg-yellow-100 text-yellow-800"
+                                        className="font-semibold cursor-pointer hover:underline"
+                                        onClick={() => handleVendorClick(vendor)}
+                                        title={vendor.userId?.name}
+                                    >
+                                        {vendor.userId?.name?.length > 15
+                                            ? `${vendor.userId?.name.slice(0, 15)}...`
+                                            : vendor.userId?.name || "N/A"}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-3">{vendor.email || "N/A"}</td>
+                                <td className="px-6 py-3">{vendor.address?.city || "N/A"}</td>
+                                <td className="px-6 py-3">{vendor.documents?.nationalId || "N/A"}</td>
+                                <td className="px-6 py-3 capitalize">
+                                    <span
+                                        className={`px-3 py-1 text-xs font-semibold rounded-full ${vendor.status === "approved"
+                                            ? "bg-green-100 text-green-700"
+                                            : vendor.status === "pending"
+                                                ? "bg-yellow-100 text-yellow-700"
+                                                : vendor.status === "rejected"
+                                                    ? "bg-red-100 text-red-700"
+                                                    : vendor.status === "misInfo"
+                                                        ? "bg-purple-100 text-purple-700"
+                                                        : "bg-gray-100 text-gray-600"
                                             }`}
                                     >
                                         {vendor.status}
                                     </span>
-                                    <span
-                                        className={`px-2 py-1 rounded-full font-semibold ${vendor.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                                            }`}
+                                </td>
+                                <td className="px-6 py-3 text-right">
+                                    <button
+                                        className="px-3 py-1.5 rounded-md bg-teal-500 text-white text-xs font-semibold hover:bg-teal-600 transition"
+                                        onClick={() => handleVendorClick(vendor)}
                                     >
-                                        {vendor.isActive ? "Active" : "Inactive"}
-                                    </span>
-                                    <span
-                                        className={`px-2 py-1 rounded-full font-semibold ${vendor.isVerified ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"
-                                            }`}
-                                    >
-                                        {vendor.isVerified ? "Verified" : "Unverified"}
-                                    </span>
-                                    <span
-                                        className={`px-2 py-1 rounded-full font-semibold ${vendor.isBlocked ? "bg-red-200 text-red-800" : "bg-green-200 text-green-800"
-                                            }`}
-                                    >
-                                        {vendor.isBlocked ? "Blocked" : "Not Blocked"}
-                                    </span>
-                                    <span className="px-2 py-1 rounded-full font-semibold bg-gray-100 text-gray-700">
-                                        Rating: {vendor.rating || "N/A"}
-                                    </span>
-                                </div>
+                                        Details
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
 
+                {filteredVendors?.length === 0 && (
+                    <p className="p-6 text-center text-gray-500">
+                        No vendors found for selected status.
+                    </p>
+                )}
+            </div>
 
-
-                                {/* Social Links */}
-                                {vendor.socialLinks && (
-                                    <div className="flex gap-3 mb-3 text-sm">
-                                        {vendor.socialLinks.facebook && (
-                                            <a
-                                                href={vendor.socialLinks.facebook}
-                                                target="_blank"
-                                                className="text-blue-600 hover:underline"
-                                            >
-                                                Facebook
-                                            </a>
-                                        )}
-                                        {vendor.socialLinks.instagram && (
-                                            <a
-                                                href={vendor.socialLinks.instagram}
-                                                target="_blank"
-                                                className="text-pink-600 hover:underline"
-                                            >
-                                                Instagram
-                                            </a>
-                                        )}
-                                        {vendor.socialLinks.twitter && (
-                                            <a
-                                                href={vendor.socialLinks.twitter}
-                                                target="_blank"
-                                                className="text-sky-500 hover:underline"
-                                            >
-                                                Twitter
-                                            </a>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Metadata */}
-                                <div className="text-xs text-gray-400 space-y-1">
-                                    <p>Joined: {new Date(vendor.createdAt).toLocaleDateString()}</p>
-                                    <p>Updated: {new Date(vendor.updatedAt).toLocaleDateString()}</p>
-                                    {vendor.approvalDate && <p>Approved on: {new Date(vendor.approvalDate).toLocaleDateString()}</p>}
-                                    {vendor.approvedBy && <p>Approved By: {vendor.approvedBy.name} ({vendor.approvedBy.email})</p>}
-                                    {vendor.blockInfo && <p>Blocked By: {vendor.blockInfo.blockedBy}</p>}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {/* ✅ Vendor Modal */}
+            <VendorModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                vendor={selectedVendor}
+            />
         </div>
     );
 };
